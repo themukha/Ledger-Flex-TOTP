@@ -1,0 +1,9 @@
+.DS_Store
+target/
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+snapshots-tmp/
+.idea/
+*.iml
