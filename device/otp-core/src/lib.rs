@@ -3,3 +3,4 @@
 pub mod clock;
 pub mod record;
 pub mod totp;
+pub mod vault;
