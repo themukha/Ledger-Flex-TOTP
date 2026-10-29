@@ -1,0 +1,21 @@
+[package]
+name = "flex-app"
+version = "0.1.0"
+authors = ["George Mukha"]
+edition = "2021"
+
+[dependencies]
+ledger_device_sdk = { version = "*", features = ["io_new", "app_storage", "sys"] }
+arrayvec = { version = "0.7", default-features = false }
+zeroize = { version = "1", default-features = false }
+otp-core = { path = "../otp-core" }
+
+[package.metadata.ledger]
+curve = ["secp256k1"]
+flags = "0"
+path = ["5198928'"]
+name = "Authenticator"
+flex = { icon = "icons/otp_40x40.gif" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("apex_p", "stax", "flex", "nanos", "nanox", "nanosplus"))'] }

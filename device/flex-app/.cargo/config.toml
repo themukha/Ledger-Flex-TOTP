@@ -1,0 +1,17 @@
+[target.flex]
+runner = "speculos -m flex"
+
+[build]
+target = "flex"
+
+[profile.release]
+opt-level = 'z'
+lto = true
+
+[unstable]
+build-std = ["core", "alloc"]
+build-std-features = ["compiler-builtins-mem"]
+
+[env]
+HEAP_SIZE = "24576"
+APP_STORAGE_SIZE = "12800"
