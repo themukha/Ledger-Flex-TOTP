@@ -1,0 +1,4 @@
+[app]
+build_directory = "device/flex-app"
+sdk = "Rust"
+devices = ["flex"]
