@@ -1,13 +1,14 @@
 use super::nbgl::{
     add_footer_text, begin, finish, icon, put, Icon, TOKEN_BACK, TOKEN_CANCEL, TOKEN_DELETE,
-    TOKEN_HOLD,
+    TOKEN_HOLD, TOKEN_QUIT,
 };
 use core::ffi::{c_char, CStr};
 use ledger_device_sdk::sys::{
     nbgl_contentCenter_t, nbgl_contentTagValueList_t, nbgl_contentTagValue_t, nbgl_icon_details_t,
     nbgl_layoutAddContentCenter, nbgl_layoutAddHeader, nbgl_layoutAddTagValueList,
     nbgl_layoutAddUpFooter, nbgl_layoutHeader_t, nbgl_layoutUpFooter_t, nbgl_layout_t,
-    HEADER_EXTENDED_BACK, NBGL_INVALID_TOKEN, TUNE_TAP_CASUAL, UP_FOOTER_LONG_PRESS,
+    HEADER_EXTENDED_BACK, NBGL_INVALID_TOKEN, TUNE_TAP_CASUAL, UP_FOOTER_BUTTON,
+    UP_FOOTER_LONG_PRESS, WHITE_BACKGROUND,
 };
 use otp_core::record::{Algorithm, Record};
 
@@ -94,6 +95,16 @@ pub fn draw_settings(version: (u8, u8, u8), count: usize, capacity: usize) {
     );
     set_pair(1, c"Accounts", format_args!("{} of {}", count, capacity));
     add_pairs(layout, 2);
+    unsafe {
+        let mut up: nbgl_layoutUpFooter_t = core::mem::zeroed();
+        up.type_ = UP_FOOTER_BUTTON;
+        let button = &mut up.__bindgen_anon_1.button;
+        button.text = c"Quit app".as_ptr();
+        button.token = TOKEN_QUIT;
+        button.style = WHITE_BACKGROUND;
+        button.tuneId = TUNE_TAP_CASUAL;
+        nbgl_layoutAddUpFooter(layout, &up);
+    }
     add_footer_text(layout, c"Delete all accounts", TOKEN_DELETE);
     finish(layout);
 }

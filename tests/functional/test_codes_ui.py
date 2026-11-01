@@ -218,3 +218,34 @@ def test_time_synced_toast_snapshot(backend, golden_run, default_screenshot_path
     backend.wait_for_text_on_screen("Time synced")
     snapshot(backend, golden_run, default_screenshot_path, "time_synced_toast", timeout=1.0)
     backend.wait_for_text_on_screen("No accounts yet", timeout=3.0)
+
+
+CLOSE_BUTTON = (428, 47)
+QUIT_APP_BUTTON = (SCREEN_X_CENTER, 435)
+QUIT_TIMEOUT = 5.0
+
+
+def assert_app_exited(backend):
+    deadline = time.time() + QUIT_TIMEOUT
+    while time.time() < deadline:
+        try:
+            if send(backend, p.get_info()).status != p.Sw.OK:
+                return
+        except Exception:
+            return
+        time.sleep(0.2)
+    raise AssertionError("app is still running")
+
+
+def test_close_key_quits_app(backend):
+    backend.wait_for_text_on_screen("Sync time from iPhone")
+    tap(backend, CLOSE_BUTTON)
+    assert_app_exited(backend)
+
+
+def test_settings_quit_app(backend):
+    backend.wait_for_text_on_screen("Sync time from iPhone")
+    tap(backend, FOOTER_TEXT)
+    backend.wait_for_text_on_screen("Quit app")
+    tap(backend, QUIT_APP_BUTTON)
+    assert_app_exited(backend)

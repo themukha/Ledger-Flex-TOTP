@@ -31,8 +31,8 @@ use ui::codes::{
     ROWS_PER_PAGE,
 };
 use ui::nbgl::{
-    take_action, TOKEN_BACK, TOKEN_CANCEL, TOKEN_DELETE, TOKEN_HOLD, TOKEN_NAV, TOKEN_ROW,
-    TOKEN_SETTINGS,
+    take_action, TOKEN_BACK, TOKEN_CANCEL, TOKEN_DELETE, TOKEN_HOLD, TOKEN_NAV, TOKEN_QUIT,
+    TOKEN_ROW, TOKEN_SETTINGS,
 };
 use ui::review::review_import;
 
@@ -403,6 +403,7 @@ impl State {
                 self.store.remove(i);
                 Screen::Home
             }
+            (Screen::Home | Screen::Settings, TOKEN_QUIT) => ledger_device_sdk::sys::exit_app(0),
             (Screen::Settings, TOKEN_DELETE) => Screen::ConfirmDeleteAll,
             (Screen::ConfirmDeleteAll, TOKEN_CANCEL) => Screen::Settings,
             (Screen::ConfirmDeleteAll, TOKEN_HOLD) => {

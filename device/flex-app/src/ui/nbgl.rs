@@ -6,7 +6,8 @@ use ledger_device_sdk::nbgl::NbglGlyph;
 use ledger_device_sdk::sys::{
     nbgl_icon_details_t, nbgl_layoutAddExtendedFooter, nbgl_layoutDescription_t, nbgl_layoutDraw,
     nbgl_layoutFooter_t, nbgl_layoutGet, nbgl_layoutRelease, nbgl_layout_t, nbgl_refresh,
-    nbgl_screenRedraw, FOOTER_SIMPLE_TEXT, TUNE_TAP_CASUAL,
+    nbgl_refreshSpecial, nbgl_screenRedraw, BLACK_AND_WHITE_FAST_REFRESH, FOOTER_SIMPLE_TEXT,
+    TUNE_TAP_CASUAL,
 };
 
 pub const TOKEN_SETTINGS: u8 = 1;
@@ -16,6 +17,7 @@ pub const TOKEN_BACK: u8 = 4;
 pub const TOKEN_DELETE: u8 = 5;
 pub const TOKEN_HOLD: u8 = 6;
 pub const TOKEN_CANCEL: u8 = 7;
+pub const TOKEN_QUIT: u8 = 8;
 
 pub const SLOT_LEN: usize = 96;
 pub const SLOTS: usize = 12;
@@ -55,19 +57,22 @@ pub fn put(slot: usize, args: core::fmt::Arguments) -> *const c_char {
 
 const TRASH: NbglGlyph = NbglGlyph::from_include(include_gif!("icons/Trash_64px.gif", NBGL));
 const CHECK: NbglGlyph = NbglGlyph::from_include(include_gif!("icons/Check_Circle_64px.gif", NBGL));
+const CLOSE: NbglGlyph = NbglGlyph::from_include(include_gif!("icons/Close_40px.gif", NBGL));
 
 #[derive(Clone, Copy)]
 pub enum Icon {
     Trash,
     Check,
+    Close,
 }
 
-static mut ICONS: [nbgl_icon_details_t; 2] = unsafe { core::mem::zeroed() };
+static mut ICONS: [nbgl_icon_details_t; 3] = unsafe { core::mem::zeroed() };
 
 pub fn icon(icon: Icon) -> *const nbgl_icon_details_t {
     let glyph = match icon {
         Icon::Trash => &TRASH,
         Icon::Check => &CHECK,
+        Icon::Close => &CLOSE,
     };
     unsafe {
         let slot = &mut (*(&raw mut ICONS))[icon as usize];
@@ -116,7 +121,7 @@ pub fn finish(layout: *mut nbgl_layout_t) {
 pub fn redraw_in_place() {
     unsafe {
         nbgl_screenRedraw();
-        nbgl_refresh();
+        nbgl_refreshSpecial(BLACK_AND_WHITE_FAST_REFRESH);
     }
 }
 

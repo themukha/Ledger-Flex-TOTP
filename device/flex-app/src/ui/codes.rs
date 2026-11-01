@@ -1,6 +1,6 @@
 use super::nbgl::{
-    add_footer_text, begin, finish, icon, put, redraw_in_place, Icon, TOKEN_NAV, TOKEN_ROW,
-    TOKEN_SETTINGS,
+    add_footer_text, begin, finish, icon, put, redraw_in_place, Icon, TOKEN_NAV, TOKEN_QUIT,
+    TOKEN_ROW, TOKEN_SETTINGS,
 };
 use arrayvec::ArrayString;
 use core::ffi::CStr;
@@ -8,7 +8,7 @@ use ledger_device_sdk::sys::{
     nbgl_contentCenter_t, nbgl_contentTagValueList_t, nbgl_contentTagValue_t, nbgl_icon_details_t,
     nbgl_layoutAddContentCenter, nbgl_layoutAddExtendedFooter, nbgl_layoutAddHeader,
     nbgl_layoutAddTagValueList, nbgl_layoutFooter_t, nbgl_layoutHeader_t, nbgl_layout_t,
-    FOOTER_TEXT_AND_NAV, HEADER_TITLE, TUNE_TAP_CASUAL,
+    FOOTER_TEXT_AND_NAV, HEADER_EXTENDED_BACK, NBGL_INVALID_TOKEN, TUNE_TAP_CASUAL,
 };
 
 pub const ROWS_PER_PAGE: usize = 4;
@@ -26,14 +26,24 @@ const SLOT_ROWS: usize = 1;
 
 static mut PAIRS: [nbgl_contentTagValue_t; ROWS_PER_PAGE] = unsafe { core::mem::zeroed() };
 
-fn add_header(layout: *mut nbgl_layout_t, time: &str) {
+fn add_home_header(layout: *mut nbgl_layout_t, text: *const core::ffi::c_char) {
     unsafe {
         let mut header: nbgl_layoutHeader_t = core::mem::zeroed();
-        header.type_ = HEADER_TITLE;
+        header.type_ = HEADER_EXTENDED_BACK;
         header.separationLine = true;
-        header.__bindgen_anon_1.title.text = put(SLOT_HEADER, format_args!("Codes  {}", time));
+        let ext = &mut header.__bindgen_anon_1.extendedBack;
+        ext.text = text;
+        ext.actionIcon = icon(Icon::Close);
+        ext.actionToken = TOKEN_QUIT;
+        ext.backToken = NBGL_INVALID_TOKEN as u8;
+        ext.textToken = NBGL_INVALID_TOKEN as u8;
+        ext.tuneId = TUNE_TAP_CASUAL;
         nbgl_layoutAddHeader(layout, &header);
     }
+}
+
+fn add_header(layout: *mut nbgl_layout_t, time: &str) {
+    add_home_header(layout, put(SLOT_HEADER, format_args!("Codes  {}", time)));
 }
 
 fn add_center(
@@ -122,6 +132,7 @@ pub fn draw_no_accounts(header_time: &str) {
 
 pub fn draw_unsynced() {
     let Some(layout) = begin() else { return };
+    add_home_header(layout, c"Authenticator".as_ptr());
     add_center(
         layout,
         core::ptr::null(),

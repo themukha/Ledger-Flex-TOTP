@@ -8,6 +8,7 @@ Run `ledger-otp sync-time` first. Compare `ledger-otp info` (device local time) 
 - [ ] Import one account, reinstall the app: does `ledger-otp list` still show it? Same after uninstall + install.
 - [ ] Import 64 accounts: no crash, 65th is reported as no space.
 - [ ] Codes screen: flicker on the per-second update, `NNs` countdown readable, no ghost tap after "Hold to delete".
+- [ ] Close key and "Quit app" return to the dashboard.
 
 ## Acceptance
 
