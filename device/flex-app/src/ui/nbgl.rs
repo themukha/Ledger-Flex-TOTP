@@ -6,8 +6,8 @@ use ledger_device_sdk::nbgl::NbglGlyph;
 use ledger_device_sdk::sys::{
     nbgl_icon_details_t, nbgl_layoutAddExtendedFooter, nbgl_layoutDescription_t, nbgl_layoutDraw,
     nbgl_layoutFooter_t, nbgl_layoutGet, nbgl_layoutRelease, nbgl_layout_t, nbgl_refresh,
-    nbgl_refreshSpecial, nbgl_screenRedraw, BLACK_AND_WHITE_FAST_REFRESH, FOOTER_SIMPLE_TEXT,
-    TUNE_TAP_CASUAL,
+    nbgl_refreshSpecial, nbgl_screenRedraw, BLACK_AND_WHITE_REFRESH, FOOTER_SIMPLE_TEXT,
+    FULL_COLOR_CLEAN_REFRESH, TUNE_TAP_CASUAL,
 };
 
 pub const TOKEN_SETTINGS: u8 = 1;
@@ -118,10 +118,19 @@ pub fn finish(layout: *mut nbgl_layout_t) {
     }
 }
 
+const CLEAN_REFRESH_EVERY: u8 = 30;
+static mut FAST_REFRESHES: u8 = 0;
+
 pub fn redraw_in_place() {
     unsafe {
         nbgl_screenRedraw();
-        nbgl_refreshSpecial(BLACK_AND_WHITE_FAST_REFRESH);
+        FAST_REFRESHES += 1;
+        if FAST_REFRESHES >= CLEAN_REFRESH_EVERY {
+            FAST_REFRESHES = 0;
+            nbgl_refreshSpecial(FULL_COLOR_CLEAN_REFRESH);
+        } else {
+            nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
+        }
     }
 }
 
