@@ -249,3 +249,30 @@ def test_settings_quit_app(backend):
     backend.wait_for_text_on_screen("Quit app")
     tap(backend, QUIT_APP_BUTTON)
     assert_app_exited(backend)
+
+
+HIDE_AFTER_SECONDS = 60
+
+
+def test_codes_hide_when_idle(backend, navigator):
+    import_accounts(backend, navigator)
+    sync_and_wait_home(backend)
+    time.sleep(HIDE_AFTER_SECONDS - 5)
+    assert backend.compare_screen_with_text("GitHub")
+    time.sleep(10)
+    backend.wait_for_text_on_screen("Codes hidden")
+    assert not backend.compare_screen_with_text("GitHub")
+    tap(backend, FOOTER_TEXT)
+    backend.wait_for_text_on_screen("GitHub")
+    assert info(backend).synced == 1
+
+
+def test_clock_rate_after_import_review(backend, navigator):
+    import_accounts(backend, navigator)
+    sync_and_wait_home(backend)
+    start = info(backend).now_unix
+    host_start = time.time()
+    time.sleep(10)
+    device_elapsed = info(backend).now_unix - start
+    host_elapsed = time.time() - host_start
+    assert abs(device_elapsed - host_elapsed) <= 2, (device_elapsed, host_elapsed)
