@@ -2,13 +2,13 @@
 
 Run `ledger-otp sync-time` first. Compare `ledger-otp info` (device local time) with `date`.
 
-- [ ] Lock the Flex for 5 minutes, unlock: is the app still open, and is the clock still right?
-- [ ] Leave it unlocked on the app for an hour: drift in seconds?
-- [ ] After the screen turns off: codes, "Sync time from iPhone", or the dashboard?
-- [ ] Import one account, reinstall the app: does `ledger-otp list` still show it? Same after uninstall + install.
-- [ ] Import 64 accounts: no crash, 65th is reported as no space.
-- [ ] Codes screen: flicker on the per-second update, `NNs` countdown readable, no ghost tap after "Hold to delete".
-- [ ] Close key and "Quit app" return to the dashboard.
+- [x] Lock the Flex for 5 minutes, unlock: is the app still open, and is the clock still right?
+- [x] Leave it unlocked on the app for an hour: drift in seconds?
+- [x] After the screen turns off: codes, "Sync time from iPhone", or the dashboard?
+- [x] Import one account, reinstall the app: does `ledger-otp list` still show it? Same after uninstall + install.
+- [x] Import 64 accounts: no crash, 65th is reported as no space.
+- [ ] Codes screen: no ghosting on the per-second update, `NNs` countdown readable, no ghost tap after "Hold to delete".
+- [x] Close key and "Quit app" return to the dashboard.
 
 ## Acceptance
 
@@ -18,6 +18,12 @@ Run `ledger-otp sync-time` first. Compare `ledger-otp info` (device local time) 
 4. `ledger-otp backup b.lotp`
 5. `ledger-otp restore b.lotp`: everything reported as already on device.
 
+## Results (Flex OS 1.7.0, 2026-11-04)
+
 | Check | Result |
 | :--- | :--- |
-| | |
+| Screen lock | App stays open, codes stay, clock keeps running |
+| Auto-lock | Takes much longer than usual while the app is open |
+| App restart | Clock is lost, `sync-time` needed every time |
+| Ghosting | Fast B&W refresh smears in seconds; contrast B&W refresh is much better, slight smear left. Clean refresh every 10 s and on code change: to check |
+| Everything else | OK |
