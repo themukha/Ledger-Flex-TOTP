@@ -18,6 +18,7 @@ pub const TOKEN_DELETE: u8 = 5;
 pub const TOKEN_HOLD: u8 = 6;
 pub const TOKEN_CANCEL: u8 = 7;
 pub const TOKEN_QUIT: u8 = 8;
+pub const TOKEN_SHOW: u8 = 9;
 
 pub const SLOT_LEN: usize = 96;
 pub const SLOTS: usize = 12;

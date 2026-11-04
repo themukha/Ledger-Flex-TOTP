@@ -1,6 +1,6 @@
 use super::nbgl::{
     add_footer_text, begin, finish, icon, put, redraw_in_place, Icon, TOKEN_NAV, TOKEN_QUIT,
-    TOKEN_ROW, TOKEN_SETTINGS,
+    TOKEN_ROW, TOKEN_SETTINGS, TOKEN_SHOW,
 };
 use arrayvec::ArrayString;
 use core::ffi::CStr;
@@ -127,6 +127,19 @@ pub fn draw_no_accounts(header_time: &str) {
     add_header(layout, header_time);
     add_center(layout, core::ptr::null(), c"No accounts yet", None);
     add_footer_text(layout, c"Settings", TOKEN_SETTINGS);
+    finish(layout);
+}
+
+pub fn draw_hidden() {
+    let Some(layout) = begin() else { return };
+    add_home_header(layout, c"Authenticator".as_ptr());
+    add_center(
+        layout,
+        core::ptr::null(),
+        c"Codes hidden",
+        Some(c"Hidden after a minute without a touch."),
+    );
+    add_footer_text(layout, c"Show codes", TOKEN_SHOW);
     finish(layout);
 }
 

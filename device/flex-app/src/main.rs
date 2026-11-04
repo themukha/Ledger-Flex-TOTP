@@ -27,12 +27,12 @@ use ui::account::{
     draw_confirm_delete, draw_confirm_delete_all, draw_confirm_export, draw_details, draw_settings,
 };
 use ui::codes::{
-    draw_codes_page, draw_no_accounts, draw_time_synced, draw_unsynced, update_codes_page, CodeRow,
-    ROWS_PER_PAGE,
+    draw_codes_page, draw_hidden, draw_no_accounts, draw_time_synced, draw_unsynced,
+    update_codes_page, CodeRow, ROWS_PER_PAGE,
 };
 use ui::nbgl::{
     take_action, TOKEN_BACK, TOKEN_CANCEL, TOKEN_DELETE, TOKEN_HOLD, TOKEN_NAV, TOKEN_QUIT,
-    TOKEN_ROW, TOKEN_SETTINGS,
+    TOKEN_ROW, TOKEN_SETTINGS, TOKEN_SHOW,
 };
 use ui::review::review_import;
 
@@ -73,7 +73,10 @@ enum Screen {
     ConfirmDeleteAll,
     ConfirmExport,
     Toast { until: u64 },
+    Hidden,
 }
+
+const HIDE_CODES_AFTER_TICKS: u64 = 600;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum HomeDrawn {
@@ -95,6 +98,7 @@ struct State {
     home_drawn: Option<HomeDrawn>,
     shown_sec: u64,
     needs_draw: bool,
+    last_activity: u64,
 }
 
 type Response = ArrayVec<u8, MAX_LIST_BYTES>;
@@ -316,6 +320,7 @@ impl State {
             Screen::ConfirmDeleteAll => draw_confirm_delete_all(),
             Screen::ConfirmExport => draw_confirm_export(),
             Screen::Toast { .. } => draw_time_synced(),
+            Screen::Hidden => draw_hidden(),
         }
     }
 
@@ -352,6 +357,11 @@ impl State {
             }
             Screen::Home => {
                 let Some(clock) = self.clock else { return };
+                if self.ticks - self.last_activity >= HIDE_CODES_AFTER_TICKS {
+                    self.screen = Screen::Hidden;
+                    self.show();
+                    return;
+                }
                 let utc = clock.utc(self.ticks);
                 if utc == self.shown_sec {
                     return;
@@ -403,7 +413,10 @@ impl State {
                 self.store.remove(i);
                 Screen::Home
             }
-            (Screen::Home | Screen::Settings, TOKEN_QUIT) => ledger_device_sdk::sys::exit_app(0),
+            (Screen::Home | Screen::Settings | Screen::Hidden, TOKEN_QUIT) => {
+                ledger_device_sdk::sys::exit_app(0)
+            }
+            (Screen::Hidden, TOKEN_SHOW) => Screen::Home,
             (Screen::Settings, TOKEN_DELETE) => Screen::ConfirmDeleteAll,
             (Screen::ConfirmDeleteAll, TOKEN_CANCEL) => Screen::Settings,
             (Screen::ConfirmDeleteAll, TOKEN_HOLD) => {
@@ -452,12 +465,14 @@ extern "C" fn sample_main(_arg0: u32) {
         home_drawn: None,
         shown_sec: 0,
         needs_draw: false,
+        last_activity: 0,
     };
     state.show();
 
     loop {
         match comm.next_event() {
             Event::Command(command) => {
+                state.last_activity = state.ticks;
                 let header = command.decode::<Header>();
                 if header.as_ref().map_or(true, |h| h.ins != INS_EXPORT_BACKUP) {
                     state.export_approved = false;
@@ -486,6 +501,7 @@ extern "C" fn sample_main(_arg0: u32) {
                 }
             }
             Event::Ticker => state.tick(),
+            Event::Touch => state.last_activity = state.ticks,
             _ => {}
         }
         if let Some((token, index)) = take_action() {
