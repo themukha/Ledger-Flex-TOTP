@@ -13,7 +13,6 @@ use ledger_device_sdk::sys::{
 
 pub const ROWS_PER_PAGE: usize = 4;
 
-#[allow(dead_code)]
 pub struct CodeRow {
     pub issuer: ArrayString<32>,
     pub code: ArrayString<9>,
@@ -119,7 +118,8 @@ pub fn update_codes_page(rows: &[CodeRow], header_time: &str) {
         return;
     }
     fill(rows, header_time);
-    redraw_in_place();
+    let code_changed = rows.iter().any(|row| row.remaining == row.period);
+    redraw_in_place(code_changed);
 }
 
 pub fn draw_no_accounts(header_time: &str) {

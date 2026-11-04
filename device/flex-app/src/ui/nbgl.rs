@@ -118,15 +118,15 @@ pub fn finish(layout: *mut nbgl_layout_t) {
     }
 }
 
-const CLEAN_REFRESH_EVERY: u8 = 30;
-static mut FAST_REFRESHES: u8 = 0;
+const CLEAN_REFRESH_EVERY: u8 = 10;
+static mut PARTIAL_REFRESHES: u8 = 0;
 
-pub fn redraw_in_place() {
+pub fn redraw_in_place(force_clean: bool) {
     unsafe {
         nbgl_screenRedraw();
-        FAST_REFRESHES += 1;
-        if FAST_REFRESHES >= CLEAN_REFRESH_EVERY {
-            FAST_REFRESHES = 0;
+        PARTIAL_REFRESHES += 1;
+        if force_clean || PARTIAL_REFRESHES >= CLEAN_REFRESH_EVERY {
+            PARTIAL_REFRESHES = 0;
             nbgl_refreshSpecial(FULL_COLOR_CLEAN_REFRESH);
         } else {
             nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
