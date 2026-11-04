@@ -29,6 +29,8 @@ class Sw(IntEnum):
     BATCH_FULL = 0xB002
     DECRYPT_FAILED = 0xB003
     EXPORT_NOT_APPROVED = 0xB004
+    DEVICE_LOCKED = 0x5515
+    APP_NOT_OPEN = 0x6511
 
 
 @dataclass(frozen=True)
@@ -121,9 +123,19 @@ def export_backup(chunk: int) -> bytes:
     return _apdu(Ins.EXPORT_BACKUP, p1=chunk)
 
 
+STATUS_MESSAGES = {
+    Sw.DENIED: "Rejected on device",
+    Sw.DEVICE_LOCKED: "Ledger is locked. Unlock it and open Authenticator",
+    Sw.APP_NOT_OPEN: "Authenticator is not open. Open it on the Ledger",
+    Sw.WRONG_CLA: "Another app is open on the Ledger. Open Authenticator",
+    Sw.INS_NOT_SUPPORTED: "Another app is open on the Ledger. Open Authenticator",
+}
+
+
 class DeviceError(Exception):
     def __init__(self, sw: int):
-        super().__init__(f"device returned status 0x{sw:04X}")
+        message = STATUS_MESSAGES.get(sw, f"device returned status 0x{sw:04X}")
+        super().__init__(message)
         self.sw = sw
 
 BACKUP_MAGIC = b"LOTP"

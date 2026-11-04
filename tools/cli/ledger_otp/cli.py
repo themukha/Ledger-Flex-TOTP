@@ -219,8 +219,8 @@ def main(argv=None) -> int:
     try:
         return args.fn(Device(args.speculos), args)
     except p.DeviceError as e:
-        if e.sw == p.Sw.DENIED:
-            print("Rejected on device", file=sys.stderr)
+        if e.sw in p.STATUS_MESSAGES:
+            print(e, file=sys.stderr)
         else:
             print(f"Device error: {e}", file=sys.stderr)
         return 1

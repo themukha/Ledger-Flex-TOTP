@@ -119,3 +119,38 @@ def test_info_prints_device_local_time(capsys):
 
     cli.cmd_info(Dev(), argparse.Namespace())
     assert "2023-11-15 00:13:20 (device local time, UTC+02:00)" in capsys.readouterr().out
+
+
+class StatusDev:
+    def __init__(self, sw: int):
+        self.sw = sw
+
+    def __getattr__(self, name):
+        def fail(*args, **kwargs):
+            raise p.DeviceError(self.sw)
+
+        return fail
+
+
+@pytest.mark.parametrize(
+    "sw, message",
+    [
+        (p.Sw.DEVICE_LOCKED, "Ledger is locked"),
+        (p.Sw.APP_NOT_OPEN, "Authenticator is not open"),
+        (p.Sw.WRONG_CLA, "Another app is open"),
+        (p.Sw.DENIED, "Rejected on device"),
+    ],
+)
+def test_known_status_prints_hint(monkeypatch, capsys, sw, message):
+    monkeypatch.setattr(cli, "Device", lambda speculos: StatusDev(sw))
+    assert cli.main(["info"]) == 1
+    err = capsys.readouterr().err
+    assert message in err
+    assert "0x" not in err
+
+
+def test_unknown_status_prints_code(monkeypatch, capsys):
+    unknown_sw = 0x6F42
+    monkeypatch.setattr(cli, "Device", lambda speculos: StatusDev(unknown_sw))
+    assert cli.main(["info"]) == 1
+    assert "Device error: device returned status 0x6F42" in capsys.readouterr().err
