@@ -23,7 +23,8 @@ Run `ledger-otp sync-time` first. Compare `ledger-otp info` (device local time) 
 | Check | Result |
 | :--- | :--- |
 | Screen lock | App stays open, codes stay, clock keeps running |
-| Auto-lock | Takes much longer than usual while the app is open |
+| Idle hide | Codes hide after a minute without a touch |
+| Auto-lock | Works on schedule once the codes are hidden |
 | App restart | Clock is lost, `sync-time` needed every time |
 | Ghosting | Fast B&W refresh smears in seconds; contrast B&W refresh is much better, slight smear left. Clean refresh every 10 s and on code change: to check |
 | Everything else | OK |
